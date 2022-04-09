@@ -9,6 +9,12 @@ import { CreateOrderDto } from './dto/create-order.dto';
 
 import { OrderItem } from '../order-items/order-item.entity';
 import { Order } from './entities/order.entity';
+import { OrderQueryDto } from './dto/query-order.dto';
+import {
+  IPaginateOptions,
+  IPaginationMeta,
+  paginate,
+} from 'src/utils/paginate';
 
 @Injectable()
 export class OrdersService {
@@ -35,46 +41,44 @@ export class OrdersService {
     await queryRunner.startTransaction();
 
     const newOrder = this.orderRepo.create();
+    // generate orderNumber
+    if (orderNumber.length > 0) {
+      newOrder.orderNumber =
+        dayjs().format('DDMMYYYY').toString() +
+        (orderNumber.length + 1).toString().padStart(4, '0');
+    } else {
+      newOrder.orderNumber = dayjs().format('DDMMYYYY').toString() + '0001';
+    }
+
+    // calculator weightTotal
+    newOrder.weightTotal = createOrderDto.orderItems.reduce(
+      (previousValue, currentValue) => +previousValue + +currentValue,
+      0,
+    );
+
+    // save pricePerUnit
+    newOrder.pricePerUnit = createOrderDto.pricePerUnit;
+
+    // calculator priceTotal
+    newOrder.priceTotal = Math.floor(
+      newOrder.weightTotal * newOrder.pricePerUnit,
+    );
+
+    if (
+      Math.floor(createOrderDto.employee + createOrderDto.employer) !==
+      newOrder.priceTotal
+    ) {
+      throw new BadRequestException('Cost invalid.');
+    }
+
+    // save relation
+    newOrder.user = user;
+    newOrder.customer = customer;
+    newOrder.employer = createOrderDto.employer;
+    newOrder.employee = createOrderDto.employee;
+
     try {
-      // generate orderNumber
-      if (orderNumber.length > 0) {
-        newOrder.orderNumber =
-          dayjs().format('DDMMYYYY').toString() +
-          (orderNumber.length + 1).toString().padStart(4, '0');
-      } else {
-        newOrder.orderNumber = dayjs().format('DDMMYYYY').toString() + '0001';
-      }
-
-      // calculator weightTotal
-      newOrder.weightTotal = createOrderDto.orderItems.reduce(
-        (previousValue, currentValue) => +previousValue + +currentValue,
-        0,
-      );
-
-      // save pricePerUnit
-      newOrder.pricePerUnit = createOrderDto.pricePerUnit;
-
-      // calculator priceTotal
-      newOrder.priceTotal = +(
-        newOrder.weightTotal * newOrder.pricePerUnit
-      ).toFixed(2);
-
-      if (
-        parseInt(
-          (createOrderDto.employee + createOrderDto.employer).toFixed(2),
-        ) !== newOrder.priceTotal
-      ) {
-        throw new BadRequestException('Cost invalid.');
-      }
-
-      // save relation
-      newOrder.user = user;
-      newOrder.customer = customer;
-      newOrder.employer = createOrderDto.employer;
-      newOrder.employee = createOrderDto.employee;
-
       const order = await this.orderRepo.save(newOrder);
-
       // map save order items
       createOrderDto.orderItems.map((v) => {
         const newOrderItems = this.orderItemRepo.create();
@@ -83,16 +87,11 @@ export class OrdersService {
         this.orderItemRepo.save(newOrderItems);
       }),
         await queryRunner.commitTransaction();
-      return order;
     } catch (error) {
       console.log(error);
-
       await queryRunner.rollbackTransaction();
     }
-  }
-
-  async genOrderNumber(orderNumber: string) {
-    return (+orderNumber + 1).toString();
+    return newOrder;
   }
 
   async findOrderByDate() {
@@ -105,11 +104,25 @@ export class OrdersService {
     });
   }
 
-  async findOne(username: string) {
-    return await this.orderRepo.findOne({ where: { email: username } });
-  }
-
   async findAll() {
     return await this.orderRepo.find({ relations: ['orderItems'] });
+  }
+
+  async findOrderByCustomerName(
+    orderQueryDto: OrderQueryDto,
+    options: IPaginateOptions,
+  ): Promise<IPaginationMeta<Order>> {
+    const orders = this.orderRepo
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.user', 'users')
+      .leftJoinAndSelect('order.customer', 'customers');
+
+    if (orderQueryDto.fullName) {
+      orders.where('customers.fullName = :fullName', {
+        fullName: orderQueryDto.fullName,
+      });
+    }
+
+    return await paginate(orders, options);
   }
 }

@@ -21,9 +21,6 @@ export class User extends BaseEntity {
   @Column({ name: 'phone', nullable: true })
   phone: string;
 
-  @Column({ name: 'address', nullable: true })
-  address: string;
-
   @BeforeInsert() async hashPassword() {
     this.password = await bcrypt.hash(this.password, 10);
   }

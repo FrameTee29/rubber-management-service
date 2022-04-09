@@ -8,10 +8,12 @@ import {
   Delete,
   UseGuards,
   Request,
+  Query,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { OrderQueryDto } from './dto/query-order.dto';
 
 @Controller('orders')
 export class OrdersController {
@@ -27,5 +29,18 @@ export class OrdersController {
   @Get()
   findAll() {
     return this.ordersService.findAll();
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/customer')
+  async getOrder(@Query() orderQueryDto: OrderQueryDto) {
+    const options = {
+      page: orderQueryDto.page,
+      limit: orderQueryDto.limit,
+    };
+    return await this.ordersService.findOrderByCustomerName(
+      orderQueryDto,
+      options,
+    );
   }
 }

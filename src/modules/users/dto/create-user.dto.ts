@@ -15,7 +15,4 @@ export class CreateUserDTO {
 
   @IsNotEmpty()
   phone: string;
-
-  @IsNotEmpty()
-  address: string;
 }
