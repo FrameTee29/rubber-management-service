@@ -7,6 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '../users/entities/user.entity';
 
 import { CreateUserDTO } from '../users/dto/create-user.dto';
+import { jwtConstants } from './jwtConstants';
 
 @Injectable()
 export class AuthService {
@@ -17,7 +18,6 @@ export class AuthService {
 
   async register(createUserDTO: CreateUserDTO) {
     const findUser = await this.findOne(createUserDTO.email);
-    console.log(findUser);
     if (findUser) {
       throw new BadRequestException('There is an email in the system.');
     }
@@ -43,8 +43,11 @@ export class AuthService {
   async login(user: any) {
     const payload = { ...user };
     return {
-      access_token: this.jwtService.sign(payload),
-      refresh_token: this.jwtService.sign(payload, { expiresIn: '2d' }),
+      accessToken: this.jwtService.sign(payload),
+      refreshToken: this.jwtService.sign(payload, {
+        secret: jwtConstants.secretRefresh,
+        expiresIn: '2d',
+      }),
     };
   }
 }
