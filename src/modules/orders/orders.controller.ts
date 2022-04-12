@@ -33,12 +33,12 @@ export class OrdersController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('/customer')
-  async getOrder(@Query() orderQueryDto: OrderQueryDto) {
+  async getOrderByCustomerPhone(@Query() orderQueryDto: OrderQueryDto) {
     const options = {
       page: orderQueryDto.page,
       limit: orderQueryDto.limit,
     };
-    return await this.ordersService.findOrderByCustomerName(
+    return await this.ordersService.findOrderByCustomerPhone(
       orderQueryDto,
       options,
     );

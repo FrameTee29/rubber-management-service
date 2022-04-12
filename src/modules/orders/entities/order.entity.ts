@@ -2,7 +2,7 @@ import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 
 import { BaseEntity } from 'src/modules/model/base.entity';
 import { User } from 'src/modules/users/entities/user.entity';
-import { OrderItem } from '../../order-items/order-item.entity';
+import { OrderItem } from './order-item.entity';
 import { Customer } from 'src/modules/customers/entities/customer.entity';
 
 @Entity('order')

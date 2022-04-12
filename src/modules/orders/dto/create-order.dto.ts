@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsArray, IsNotEmpty, IsOptional } from 'class-validator';
 
-import { OrderItemDto } from '../../order-items/order-items.dto';
+import { OrderItemDto } from './order-items.dto';
 
 export class CreateOrderDto {
   @IsNotEmpty()

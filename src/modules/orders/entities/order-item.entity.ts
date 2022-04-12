@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne } from 'typeorm';
 
 import { BaseEntity } from 'src/modules/model/base.entity';
-import { Order } from '../orders/entities/order.entity';
+import { Order } from './order.entity';
 
 @Entity('order-item')
 export class OrderItem extends BaseEntity {

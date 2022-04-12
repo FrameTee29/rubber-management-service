@@ -7,7 +7,7 @@ import { CustomersService } from 'src/modules/customers/customers.service';
 
 import { CreateOrderDto } from './dto/create-order.dto';
 
-import { OrderItem } from '../order-items/order-item.entity';
+import { OrderItem } from './entities/order-item.entity';
 import { Order } from './entities/order.entity';
 import { OrderQueryDto } from './dto/query-order.dto';
 import {
@@ -108,7 +108,7 @@ export class OrdersService {
     return await this.orderRepo.find({ relations: ['orderItems'] });
   }
 
-  async findOrderByCustomerName(
+  async findOrderByCustomerPhone(
     orderQueryDto: OrderQueryDto,
     options: IPaginateOptions,
   ): Promise<IPaginationMeta<Order>> {

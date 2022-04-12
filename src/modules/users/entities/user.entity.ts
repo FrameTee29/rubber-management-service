@@ -1,14 +1,16 @@
 import * as bcrypt from 'bcrypt';
+import { Exclude } from 'class-transformer';
 import { BeforeInsert, Column, Entity, OneToMany } from 'typeorm';
 
 import { BaseEntity } from 'src/modules/model/base.entity';
-import { Order } from 'src/modules/orders/orders/entities/order.entity';
+import { Order } from 'src/modules/orders/entities/order.entity';
 
 @Entity('user')
 export class User extends BaseEntity {
   @Column({ name: 'email', nullable: true })
   email: string;
 
+  @Exclude()
   @Column({ name: 'password', nullable: true })
   password: string;
 
