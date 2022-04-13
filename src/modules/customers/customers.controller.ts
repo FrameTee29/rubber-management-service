@@ -1,10 +1,20 @@
 import { AuthGuard } from '@nestjs/passport';
-import { Controller, Get, Post, Body, UseGuards, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  UseGuards,
+  Query,
+  Patch,
+  Param,
+} from '@nestjs/common';
 
 import { CustomersService } from './customers.service';
 
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { BaseQueryDto } from '../model/base-query.dto';
+import { UpdateCustomerDto } from './dto/update-customer.dto';
 
 @Controller('customers')
 export class CustomersController {
@@ -22,6 +32,15 @@ export class CustomersController {
       page: baseQueryDto.page,
       limit: baseQueryDto.limit,
     };
-    return this.customerService.findAll(options);
+    return this.customerService.findAll(options,baseQueryDto);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Patch('/:id')
+  updateCustomer(
+    @Param('id') id: number,
+    @Body() updateCustomerDto: UpdateCustomerDto,
+  ) {
+    return this.customerService.updateCustomer(id, updateCustomerDto);
   }
 }
