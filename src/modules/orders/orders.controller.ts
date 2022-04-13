@@ -15,12 +15,12 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { OrderQueryDto } from './dto/query-order.dto';
 
-@Controller('orders')
+@Controller()
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @UseGuards(AuthGuard('jwt'))
-  @Post('create')
+  @Post('orders/create')
   async create(@Request() req: any, @Body() createOrderDto: CreateOrderDto) {
     return await this.ordersService.create(req.user, createOrderDto);
   }
@@ -32,7 +32,7 @@ export class OrdersController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Get('/customer')
+  @Get('orders/customer')
   async getOrderByCustomerPhone(@Query() orderQueryDto: OrderQueryDto) {
     const options = {
       page: orderQueryDto.page,
@@ -42,5 +42,10 @@ export class OrdersController {
       orderQueryDto,
       options,
     );
+  }
+
+  @Get('chart/expenses')
+  findTotalExpenses() {
+    return this.ordersService.findTotalExpenses();
   }
 }

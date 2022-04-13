@@ -125,4 +125,32 @@ export class OrdersService {
 
     return await paginate(orders, options);
   }
+
+  getSqlFormatDate(date: Date) {
+    return "'" + date.toISOString() + "'";
+  }
+
+  async findTotalExpenses() {
+    const { priceTotal } = await this.orderRepo
+      .createQueryBuilder('order')
+      .select('SUM(order.priceTotal)', 'priceTotal')
+      .getRawOne();
+    const { weightTotal } = await this.orderRepo
+      .createQueryBuilder('order')
+      .select('SUM(order.weightTotal)', 'weightTotal')
+      .getRawOne();
+
+    const startDate = dayjs(new Date()).format('YYYY-MM-DD 00:00:00');
+    const endDate = dayjs(new Date()).format('YYYY-MM-DD 23:59:00');
+    console.log(startDate, endDate);
+
+    const currentOrder = await this.orderRepo
+      .createQueryBuilder('orders')
+      .where('orders.createdAt BETWEEN :startDate AND :endDate', {
+        startDate: startDate,
+        endDate: endDate,
+      })
+      .getMany();
+    return { priceTotal, weightTotal, currentOrder: currentOrder.length };
+  }
 }

@@ -19,16 +19,16 @@ export class CustomersService {
   ) {}
 
   async register(createCustomerDto: CreateCustomerDto) {
-    const findUser = await this.findOne(createCustomerDto.fullName);
+    const findUser = await this.findOne(createCustomerDto.phone);
     if (findUser) {
-      throw new BadRequestException('There is an fullName in the system.');
+      throw new BadRequestException('There is an phone in the system.');
     }
     const user = this.customerRepo.create(createCustomerDto);
     return await this.customerRepo.save(user);
   }
 
-  async findOne(username: string) {
-    return await this.customerRepo.findOne({ where: { fullName: username } });
+  async findOne(phone: string) {
+    return await this.customerRepo.findOne({ where: { phone: phone } });
   }
 
   async findAll(options: IPaginateOptions): Promise<IPaginationMeta<Customer>> {
