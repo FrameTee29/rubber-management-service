@@ -33,6 +33,9 @@ export class CustomersService {
     return await this.customerRepo.findOne({ where: { phone: phone } });
   }
 
+  async findOneByFullName(fullName: string) {
+    return await this.customerRepo.findOne({ where: { fullName: fullName } });
+  }
   async findAll(
     options: IPaginateOptions,
     baseQueryDto: BaseQueryDto,

@@ -44,7 +44,7 @@ export class OrdersController {
     );
   }
 
-  @Get('chart/expenses')
+  @Get('chart')
   findTotalExpenses() {
     return this.ordersService.findTotalExpenses();
   }

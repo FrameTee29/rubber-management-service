@@ -28,7 +28,7 @@ export class OrdersService {
 
   async create(user: any, createOrderDto: CreateOrderDto) {
     const orderNumber = await this.findOrderByDate();
-    const customer = await this.customersService.findOne(
+    const customer = await this.customersService.findOneByFullName(
       createOrderDto.customerName,
     );
 
@@ -154,7 +154,10 @@ export class OrdersService {
       .createQueryBuilder('orders')
       .getCount();
 
+    const order = await this.orderRepo.find();
+
     return {
+      order,
       priceTotal,
       weightTotal,
       currentOrder: currentOrder.length,
