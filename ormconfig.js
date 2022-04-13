@@ -5,7 +5,7 @@ module.exports = {
   username: process.env.DATABASE_USERNAME,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_DATABASE,
-  timezone: 'Z',
+  timezone: process.env.NEST_TYPEORM_TIMEZONE,
   seeds: ['dist/seeds/*.seed{.ts,.js}'],
   migrations: ['dist/migration/*{.ts,.js}'],
   entities: ['dist/**/*.entity{.ts,.js}'],
