@@ -3,11 +3,13 @@ import { BaseQueryDto } from 'src/modules/model/base-query.dto';
 
 export class QueryCustomerDto extends BaseQueryDto {
   @IsOptional()
-  day: string;
-
+  phone: string;
   @IsOptional()
-  month: string;
-
+  start: string;
+  @IsOptional()
+  end: string;
   @IsOptional()
   year: string;
+  @IsOptional()
+  day: string;
 }

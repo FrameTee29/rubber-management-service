@@ -26,13 +26,21 @@ export class OrdersService {
     private readonly orderItemRepo: Repository<OrderItem>,
   ) {}
 
+  async findOne(orderNumber: string) {
+    console.log(orderNumber);
+    
+    return await this.orderRepo.findOne({
+      where: { orderNumber: orderNumber },
+    });
+  }
+
   async create(user: any, createOrderDto: CreateOrderDto) {
     const orderNumber = await this.findOrderByDate();
     const customer = await this.customersService.findOneByPhone(
       createOrderDto.phone,
     );
-      console.log(customer);
-      
+    console.log(customer);
+
     if (!customer) {
       throw new BadRequestException('Customer name not found.');
     }

@@ -36,6 +36,12 @@ export class OrdersController {
   }
 
   @UseGuards(AuthGuard('jwt'))
+  @Get('orders/:id')
+  findOne(@Param('id') id: string) {
+    return this.ordersService.findOne(id);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
   @Get('orders/customer')
   async getOrderByCustomerPhone(@Query() orderQueryDto: OrderQueryDto) {
     const options = {

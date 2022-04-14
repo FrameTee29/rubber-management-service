@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as dayjs from 'dayjs';
 import {
   IPaginateOptions,
   IPaginationMeta,
@@ -70,34 +71,96 @@ export class CustomersService {
     return count;
   }
 
-  async findAllOrderByCreatedAt(
-    options: IPaginateOptions,
-    queryCustomerDto: QueryCustomerDto,
-  ): Promise<IPaginationMeta<Customer>> {
-    const customer = this.customerRepo
+  async findAllOrderByCreatedAt(queryCustomerDto: QueryCustomerDto) {
+    const perSevenDay = await this.findPriceTotalPerSevenDay(queryCustomerDto);
+    const perMonth = await this.findPriceTotalPerMonth(queryCustomerDto);
+    const perYear = await this.findPriceTotalPerYear(queryCustomerDto);
+    const currentDay = await this.findPriceTotalPerFixDay(queryCustomerDto);
+
+    return { perSevenDay, perMonth, perYear, currentDay };
+  }
+
+  async findPriceTotalPerFixDay(queryCustomerDto: QueryCustomerDto) {
+    const startDate = dayjs(queryCustomerDto.day).startOf('day').format();
+    const endDate = dayjs(queryCustomerDto.day).endOf('day').format();
+
+    const { priceTotal } = await this.customerRepo
       .createQueryBuilder('customer')
       .leftJoinAndSelect('customer.orders', 'order')
-      .leftJoinAndSelect('order.orderItems', 'orderItem')
-      .orderBy('orderItem.createdAt', 'DESC');
-
-    if (queryCustomerDto.search && queryCustomerDto.key) {
-      customer.andWhere(`customer.${queryCustomerDto.key} like :search`, {
-        search: `%${queryCustomerDto.search}%`,
-      });
-    }
-
-    if (queryCustomerDto.day) {
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(startDate.getDate() - 7);
-      startDate.setDate(startDate.getDate() + 1);
-      startDate.setHours(0, 0, 0, 0);
-      endDate.setHours(0, 0, 0, 0);
-      customer.andWhere('order.createdAt BETWEEN :endDate AND :startDate', {
+      .where('customer.phone = :phone', { phone: queryCustomerDto.phone })
+      .andWhere('order.createdAt BETWEEN :startDate AND :endDate', {
         startDate: startDate,
         endDate: endDate,
-      });
+      })
+      .select('SUM(order.priceTotal)', 'priceTotal')
+      .getRawOne();
+    if (!priceTotal) {
+      return 0;
     }
-    return await paginate(customer, options);
+    return +priceTotal;
+  }
+
+  async findPriceTotalPerSevenDay(queryCustomerDto: QueryCustomerDto) {
+    const startDate = new Date();
+    const endDate = new Date();
+    endDate.setDate(startDate.getDate() + 7);
+    startDate.setDate(startDate.getDate() - 1);
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(0, 0, 0, 0);
+
+    const { priceTotal } = await this.customerRepo
+      .createQueryBuilder('customer')
+      .leftJoinAndSelect('customer.orders', 'order')
+      .where('customer.phone = :phone', { phone: queryCustomerDto.phone })
+      .andWhere('order.createdAt BETWEEN :startDate AND :endDate', {
+        startDate: startDate,
+        endDate: endDate,
+      })
+      .select('SUM(order.priceTotal)', 'priceTotal')
+      .getRawOne();
+    if (!priceTotal) {
+      return 0;
+    }
+    return +priceTotal;
+  }
+
+  async findPriceTotalPerMonth(queryCustomerDto: QueryCustomerDto) {
+    const startDate = dayjs(queryCustomerDto.start).format();
+    const endDate = dayjs(queryCustomerDto.end).format();
+    const { priceTotal } = await this.customerRepo
+      .createQueryBuilder('customer')
+      .leftJoinAndSelect('customer.orders', 'order')
+      .where('customer.phone = :phone', { phone: queryCustomerDto.phone })
+      .andWhere('order.createdAt BETWEEN :startDate AND :endDate', {
+        startDate: startDate,
+        endDate: endDate,
+      })
+      .select('SUM(order.priceTotal)', 'priceTotal')
+      .getRawOne();
+    if (!priceTotal) {
+      return 0;
+    }
+    return +priceTotal;
+  }
+
+  async findPriceTotalPerYear(queryCustomerDto: QueryCustomerDto) {
+    const startDate = dayjs(`${queryCustomerDto.year}/01/01`)
+      .minute(0)
+      .format();
+    const endDate = dayjs(`${queryCustomerDto.year}/12/31`).format();
+    const { priceTotal } = await this.customerRepo
+      .createQueryBuilder('customer')
+      .leftJoinAndSelect('customer.orders', 'order')
+      .where('customer.phone = :phone', { phone: queryCustomerDto.phone })
+      .andWhere('order.createdAt BETWEEN :startDate AND :endDate', {
+        startDate: startDate,
+        endDate: endDate,
+      })
+      .select('SUM(order.priceTotal)', 'priceTotal')
+      .getRawOne();
+    if (!priceTotal) {
+      return 0;
+    }
+    return +priceTotal;
   }
 }

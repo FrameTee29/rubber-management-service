@@ -38,11 +38,7 @@ export class CustomersController {
 
   @Get('summary')
   findAllOrderByCreatedAt(@Query() queryCustomerDto: QueryCustomerDto) {
-    const options = {
-      page: queryCustomerDto.page,
-      limit: queryCustomerDto.limit,
-    };
-    return this.customerService.findAllOrderByCreatedAt(options, queryCustomerDto);
+    return this.customerService.findAllOrderByCreatedAt(queryCustomerDto);
   }
 
   @UseGuards(AuthGuard('jwt'))
