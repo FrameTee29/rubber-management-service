@@ -15,6 +15,7 @@ import { CustomersService } from './customers.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { BaseQueryDto } from '../model/base-query.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
+import { QueryCustomerDto } from './dto/query-customer.dto';
 
 @Controller('customers')
 export class CustomersController {
@@ -32,7 +33,16 @@ export class CustomersController {
       page: baseQueryDto.page,
       limit: baseQueryDto.limit,
     };
-    return this.customerService.findAll(options,baseQueryDto);
+    return this.customerService.findAll(options, baseQueryDto);
+  }
+
+  @Get('summary')
+  findAllOrderByCreatedAt(@Query() queryCustomerDto: QueryCustomerDto) {
+    const options = {
+      page: queryCustomerDto.page,
+      limit: queryCustomerDto.limit,
+    };
+    return this.customerService.findAllOrderByCreatedAt(options, queryCustomerDto);
   }
 
   @UseGuards(AuthGuard('jwt'))

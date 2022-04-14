@@ -28,10 +28,11 @@ export class OrdersService {
 
   async create(user: any, createOrderDto: CreateOrderDto) {
     const orderNumber = await this.findOrderByDate();
-    const customer = await this.customersService.findOneByFullName(
-      createOrderDto.customerName,
+    const customer = await this.customersService.findOneByPhone(
+      createOrderDto.phone,
     );
-
+      console.log(customer);
+      
     if (!customer) {
       throw new BadRequestException('Customer name not found.');
     }
@@ -104,8 +105,21 @@ export class OrdersService {
     });
   }
 
-  async findAll() {
-    return await this.orderRepo.find({ relations: ['orderItems'] });
+  async findAll(
+    orderQueryDto: OrderQueryDto,
+    options: IPaginateOptions,
+  ): Promise<IPaginationMeta<Order>> {
+    const orders = this.orderRepo
+      .createQueryBuilder('orders')
+      .leftJoinAndSelect('orders.orderItems', 'orderItems')
+      .leftJoinAndSelect('orders.customer', 'customers');
+
+    if (orderQueryDto.phone) {
+      orders.andWhere('customers.phone = :phone', {
+        phone: orderQueryDto.phone,
+      });
+    }
+    return await paginate(orders, options);
   }
 
   async findOrderByCustomerPhone(
@@ -154,7 +168,13 @@ export class OrdersService {
       .createQueryBuilder('orders')
       .getCount();
 
-    const order = await this.orderRepo.find();
+    const order = await this.orderRepo
+      .createQueryBuilder('orders')
+      .limit(7)
+      .orderBy('orders.id', 'ASC')
+      .getMany();
+
+    const totalCustomer = await this.customersService.findTotalCustomer();
 
     return {
       order,
@@ -162,6 +182,7 @@ export class OrdersService {
       weightTotal,
       currentOrder: currentOrder.length,
       totalOrder,
+      totalCustomer,
     };
   }
 }

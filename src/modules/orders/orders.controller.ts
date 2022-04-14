@@ -26,9 +26,13 @@ export class OrdersController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Get()
-  findAll() {
-    return this.ordersService.findAll();
+  @Get('orders')
+  async findAll(@Query() orderQueryDto: OrderQueryDto) {
+    const options = {
+      page: orderQueryDto.page,
+      limit: orderQueryDto.limit,
+    };
+    return await this.ordersService.findAll(orderQueryDto, options);
   }
 
   @UseGuards(AuthGuard('jwt'))

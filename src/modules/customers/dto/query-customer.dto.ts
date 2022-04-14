@@ -1,10 +1,13 @@
 import { IsOptional } from 'class-validator';
 import { BaseQueryDto } from 'src/modules/model/base-query.dto';
 
-export class OrderQueryDto extends BaseQueryDto {
+export class QueryCustomerDto extends BaseQueryDto {
   @IsOptional()
-  fullName: number;
+  day: string;
 
   @IsOptional()
-  phone: string;
+  month: string;
+
+  @IsOptional()
+  year: string;
 }

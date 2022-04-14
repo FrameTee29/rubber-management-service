@@ -8,7 +8,7 @@ export class CreateOrderDto {
   pricePerUnit: number;
 
   @IsNotEmpty()
-  customerName: string;
+  phone: string;
 
   @IsNotEmpty()
   @Type(() => OrderItemDto)
