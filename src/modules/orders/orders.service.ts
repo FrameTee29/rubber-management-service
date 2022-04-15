@@ -27,10 +27,9 @@ export class OrdersService {
   ) {}
 
   async findOne(orderNumber: string) {
-    console.log(orderNumber);
-    
     return await this.orderRepo.findOne({
       where: { orderNumber: orderNumber },
+      relations: ['customer', 'user']
     });
   }
 

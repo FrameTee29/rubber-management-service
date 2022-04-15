@@ -36,7 +36,7 @@ export class OrdersController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Get('orders/:id')
+  @Get('orders/ordernumber/:id')
   findOne(@Param('id') id: string) {
     return this.ordersService.findOne(id);
   }
